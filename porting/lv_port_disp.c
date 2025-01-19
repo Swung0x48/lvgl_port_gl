@@ -33,7 +33,7 @@
     #define MY_DISP_VER_RES    240
 #endif
 
-#define BYTE_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB565)) /*will be 2 for RGB565 */
+#define BYTE_PER_PIXEL (LV_COLOR_FORMAT_GET_SIZE(LV_COLOR_FORMAT_RGB888)) /*will be 2 for RGB565 */
 
 /**********************
  *      TYPEDEFS
@@ -248,7 +248,7 @@ static void disp_init(void)
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 960, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, framebuffer);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 960, 0, GL_RGB, GL_UNSIGNED_BYTE, framebuffer);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -308,22 +308,27 @@ static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t 
         /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
         int32_t x;
         int32_t y;
+        int32_t i;
         for(y = area->y1; y <= area->y2; y++) {
-            lv_memcpy(&framebuffer[(area->x1 + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL],
-                      px_map, BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
-            px_map += (BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
-//            for(x = area->x1; x <= area->x2; x++) {
-////                for (i = 0; i < BYTE_PER_PIXEL; i++) {
-////                    /*Put a pixel to the display. For example:*/
-////                    /*put_px(x, y, *px_map)*/
-////                    framebuffer[(x + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL + i] = *px_map;
-////                    px_map++;
-////                }
-//            }
+//            lv_memcpy(&framebuffer[(area->x1 + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL],
+//                      px_map, BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
+//            px_map += (BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
+            for(x = area->x1; x <= area->x2; x++) {
+//                for (i = 0; i < BYTE_PER_PIXEL; i++) {
+                    /*Put a pixel to the display. For example:*/
+                    /*put_px(x, y, *px_map)*/
+                    framebuffer[(x + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL + 2] = *px_map;
+                    px_map++;
+                    framebuffer[(x + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL + 1] = *px_map;
+                    px_map++;
+                    framebuffer[(x + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL + 0] = *px_map;
+                    px_map++;
+//                }
+            }
         }
     }
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 960, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, framebuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 960, 960, 0, GL_RGB, GL_UNSIGNED_BYTE, framebuffer);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
