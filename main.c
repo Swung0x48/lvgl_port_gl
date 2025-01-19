@@ -62,6 +62,7 @@ int main(void) {
 //    lv_label_set_text(myLabel, "Hello world!");
 //    lv_obj_align(myLabel, LV_ALIGN_CENTER, 0, 0);
 //    lv_obj_align_to(myBtn, myLabel, LV_ALIGN_OUT_TOP_MID, 0, -20);
+
     lv_obj_t * obj = lv_obj_create(lv_scr_act());
     lv_obj_set_style_bg_color(obj, lv_palette_main(LV_PALETTE_RED), 0);
     lv_obj_set_style_radius(obj, LV_RADIUS_CIRCLE, 0);

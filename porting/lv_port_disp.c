@@ -49,7 +49,7 @@ static void disp_flush(lv_display_t * disp, const lv_area_t * area, uint8_t * px
 /**********************
  *  STATIC VARIABLES
  **********************/
-uint16_t framebuffer[MY_DISP_HOR_RES * MY_DISP_VER_RES];
+uint8_t framebuffer[MY_DISP_HOR_RES * MY_DISP_VER_RES * BYTE_PER_PIXEL];
 
 GLFWwindow* window;
 /**********************
@@ -306,16 +306,20 @@ static void disp_flush(lv_display_t * disp_drv, const lv_area_t * area, uint8_t 
 {
     if(disp_flush_enabled) {
         /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
-        uint16_t * buf16 = (uint16_t *)px_map; // TODO: assuming RGB565 here
         int32_t x;
         int32_t y;
         for(y = area->y1; y <= area->y2; y++) {
-            for(x = area->x1; x <= area->x2; x++) {
-                /*Put a pixel to the display. For example:*/
-                /*put_px(x, y, *px_map)*/
-                framebuffer[x + y * MY_DISP_HOR_RES] = *buf16;
-                buf16++;
-            }
+            lv_memcpy(&framebuffer[(area->x1 + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL],
+                      px_map, BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
+            px_map += (BYTE_PER_PIXEL * (area->x2 - area->x1 + 1));
+//            for(x = area->x1; x <= area->x2; x++) {
+////                for (i = 0; i < BYTE_PER_PIXEL; i++) {
+////                    /*Put a pixel to the display. For example:*/
+////                    /*put_px(x, y, *px_map)*/
+////                    framebuffer[(x + y * MY_DISP_HOR_RES) * BYTE_PER_PIXEL + i] = *px_map;
+////                    px_map++;
+////                }
+//            }
         }
     }
 
